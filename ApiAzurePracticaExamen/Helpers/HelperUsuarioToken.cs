@@ -6,9 +6,9 @@ namespace ApiAzurePracticaExamen.Helpers
 {
     public class HelperUsuarioToken
     {
-        private HttpContextAccessor contextAccessor;
+        private IHttpContextAccessor contextAccessor;
 
-        public HelperUsuarioToken(HttpContextAccessor contextAccessor)
+        public HelperUsuarioToken(IHttpContextAccessor contextAccessor)
         {
             this.contextAccessor = contextAccessor;
         }
