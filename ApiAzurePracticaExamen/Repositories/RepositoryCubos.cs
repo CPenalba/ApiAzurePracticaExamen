@@ -1,5 +1,6 @@
 ﻿using ApiAzurePracticaExamen.Data;
 using ApiAzurePracticaExamen.Models;
+using ApiAzurePracticaExamen.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiAzurePracticaExamen.Repositories
@@ -7,11 +8,12 @@ namespace ApiAzurePracticaExamen.Repositories
     public class RepositoryCubos
     {
         private CuboContext context;
-      
+        private ServiceStorageBlob service;
 
-        public RepositoryCubos(CuboContext context)
+        public RepositoryCubos(CuboContext context, ServiceStorageBlob service)
         {
             this.context = context;
+            this.service = service;
         }
 
         public async Task<List<Cubo>> GetCubosAsync()
@@ -73,5 +75,65 @@ namespace ApiAzurePracticaExamen.Repositories
             this.context.Compras.Add(pedido);
             await this.context.SaveChangesAsync();
         }
+
+        public async Task<List<Cubo>> GetCubosBlobAsync()
+        {
+            List<Cubo> cubos = await this.context.Cubos.ToListAsync();
+            string containerUrl = this.service.GetContainerUrl("cubo");
+
+            foreach (Cubo c in cubos)
+            {
+                if (!c.Imagen.StartsWith("http"))
+                {
+                    string imagePath = c.Imagen;
+                    if (!imagePath.StartsWith("CUBOS/"))
+                    {
+                        imagePath = "CUBOS/" + imagePath;
+                    }
+
+                    c.Imagen = containerUrl + "/" + imagePath;
+                }
+            }
+
+            return cubos;
+        }
+
+        public async Task<UsuarioModel> PerfilBlobAsync(int id)
+        {
+            Usuario usuario = await this.context.Usuarios
+                .Where(x => x.IdUsuario == id)
+                .FirstOrDefaultAsync();
+
+            UsuarioModel model = new UsuarioModel
+            {
+                IdUsuario = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                Email = usuario.Email,
+                Imagen = usuario.Imagen
+            };
+
+            if (!string.IsNullOrEmpty(usuario.Imagen))
+            {
+                string containerUrl = this.service.GetContainerUrl("cubo");
+
+                if (!usuario.Imagen.StartsWith("http"))
+                {
+                    string imagePath = usuario.Imagen;
+                    if (!imagePath.StartsWith("USUARIOS/"))
+                    {
+                        imagePath = "USUARIOS/" + imagePath;
+                    }
+
+                    model.Imagen = containerUrl + "/" + imagePath;
+                }
+                else
+                {
+                    model.Imagen = usuario.Imagen;
+                }
+            }
+
+            return model;
+        }
+
     }
 }

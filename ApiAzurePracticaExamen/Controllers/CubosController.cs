@@ -26,6 +26,12 @@ namespace ApiAzurePracticaExamen.Controllers
             return await this.repo.GetCubosAsync();
         }
 
+        [HttpGet("CubosBlob")]
+        public async Task<ActionResult<List<Cubo>>> GetCubosBlob()
+        {
+            return await this.repo.GetCubosBlobAsync();
+        }
+
         [HttpGet("{marca}")]
         public async Task<ActionResult<List<Cubo>>> GetCubosMarca(string marca)
         {
@@ -45,6 +51,17 @@ namespace ApiAzurePracticaExamen.Controllers
         {
             UsuarioModel model = this.helper.GetUsuario();
             return model;
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<UsuarioModel>> PerfilUsuarioBlob()
+        {
+
+            UsuarioModel model = this.helper.GetUsuario();
+            var usuatioblob = await this.repo.PerfilBlobAsync(model.IdUsuario);
+            return usuatioblob;
         }
 
         [Authorize]

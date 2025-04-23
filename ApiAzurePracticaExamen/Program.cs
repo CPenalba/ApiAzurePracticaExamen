@@ -1,13 +1,21 @@
 using ApiAzurePracticaExamen.Data;
 using ApiAzurePracticaExamen.Helpers;
 using ApiAzurePracticaExamen.Repositories;
+using ApiAzurePracticaExamen.Services;
+using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+string azureKeys = builder.Configuration.GetValue<string>("AzureKeys:StorageAccount");
+BlobServiceClient blobServiceClient = new BlobServiceClient(azureKeys);
+builder.Services.AddTransient<BlobServiceClient>(x => blobServiceClient);
+
+
 HelperCryptography.Initialize(builder.Configuration);
 builder.Services.AddTransient<HelperUsuarioToken>();
+builder.Services.AddTransient<ServiceStorageBlob>();
 builder.Services.AddHttpContextAccessor();
 
 HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration);
