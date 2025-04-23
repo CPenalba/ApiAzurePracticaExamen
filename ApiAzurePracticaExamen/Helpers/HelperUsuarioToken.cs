@@ -1,0 +1,26 @@
+﻿using ApiAzurePracticaExamen.Models;
+using Newtonsoft.Json;
+using System.Security.Claims;
+
+namespace ApiAzurePracticaExamen.Helpers
+{
+    public class HelperUsuarioToken
+    {
+        private HttpContextAccessor contextAccessor;
+
+        public HelperUsuarioToken(HttpContextAccessor contextAccessor)
+        {
+            this.contextAccessor = contextAccessor;
+        }
+
+        public UsuarioModel GetUsuario()
+        {
+            Claim claim = this.contextAccessor.HttpContext
+                .User.FindFirst(x => x.Type == "UserData");
+            string json = claim.Value;
+            string jsonUsuario = HelperCryptography.DecryptString(json);
+            UsuarioModel model = JsonConvert.DeserializeObject<UsuarioModel>(jsonUsuario);
+            return model;
+        }
+    }
+}
