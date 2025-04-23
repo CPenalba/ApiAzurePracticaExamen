@@ -35,8 +35,6 @@ namespace ApiAzurePracticaExamen.Controllers
             else
             {
                 SigningCredentials credentials = new SigningCredentials(this.helper.GetKeyToken(), SecurityAlgorithms.HmacSha256);
-
-
                 UsuarioModel modeUsuario = new UsuarioModel();
                 modeUsuario.IdUsuario = usuario.IdUsuario;
                 modeUsuario.Nombre = usuario.Nombre;
@@ -47,7 +45,7 @@ namespace ApiAzurePracticaExamen.Controllers
                 string jsonCrifado = HelperCryptography.EncryptString(jsonUsuario);
                 Claim[] informacion = new[]
                 {
-                    new Claim("UserData", jsonUsuario)
+                    new Claim("UserData", jsonCrifado)
                 };
 
                 JwtSecurityToken token = new JwtSecurityToken(

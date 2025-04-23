@@ -48,5 +48,30 @@ namespace ApiAzurePracticaExamen.Repositories
         {
             return await this.context.Usuarios.Where(x => x.Email == email && x.Pass == pass).FirstOrDefaultAsync();
         }
+
+        public async Task<List<Compra>> GetPedidosUsuarioAsync(int id)
+        {
+            return await this.context.Compras
+                .Where(x => x.IdUsuario == id)
+                .ToListAsync();
+        }
+
+        public async Task InsertarPedido(int idcubo, int idusuario)
+        {
+            var maxIdPedido = (from datos in this.context.Compras
+                               select datos.IdPedido).Max();
+
+            int idpedido = maxIdPedido + 1;
+            DateTime fecha = DateTime.Now;
+
+            Compra pedido = new Compra();
+            pedido.IdPedido = idpedido;
+            pedido.IdCubo = idcubo;
+            pedido.IdUsuario = idusuario;
+            pedido.Fecha = fecha;
+
+            this.context.Compras.Add(pedido);
+            await this.context.SaveChangesAsync();
+        }
     }
 }

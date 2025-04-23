@@ -46,5 +46,25 @@ namespace ApiAzurePracticaExamen.Controllers
             UsuarioModel model = this.helper.GetUsuario();
             return model;
         }
+
+        [Authorize]
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<UsuarioModel>> GetCompraUsuario()
+        {
+
+            UsuarioModel model = this.helper.GetUsuario();
+            var compras = await this.repo.GetPedidosUsuarioAsync(model.IdUsuario);
+            return Ok(compras);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task InsertarPedido(int idCubo)
+        {
+            UsuarioModel model = this.helper.GetUsuario();
+            await this.repo.InsertarPedido(model.IdUsuario, idCubo);
+        }
     }
 }

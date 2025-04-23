@@ -5,14 +5,17 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 HelperCryptography.Initialize(builder.Configuration);
+builder.Services.AddTransient<HelperUsuarioToken>();
 builder.Services.AddHttpContextAccessor();
+
 HelperActionServicesOAuth helper = new HelperActionServicesOAuth(builder.Configuration);
 //ESTA INSTANCIA SOLAMENTE DEBEMOS CREARLA UNA VEZ PARA QUE NUESTRA APLICACION PUEDA VALIDAR CON TODO LO QUE HA CREADO
 builder.Services.AddSingleton<HelperActionServicesOAuth>(helper);
 //HABILITAMOS LA SEGURIDAD UTILIZANDO LA CLASE HELPER
 builder.Services.AddAuthentication(helper.GetAuthenticationSchema()).AddJwtBearer(helper.GetJwtBearerOptions());
-builder.Services.AddTransient<HelperUsuarioToken>();
+
 // Add services to the container.
 string connectionString = builder.Configuration.GetConnectionString("SqlAzure");
 builder.Services.AddTransient<RepositoryCubos>();
