@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using Azure.Security.KeyVault.Secrets;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ApiAzurePracticaExamen.Helpers
@@ -6,32 +7,44 @@ namespace ApiAzurePracticaExamen.Helpers
     public class HelperCryptography
     {
         private static IConfiguration configuration;
-        private static string keyCifrado;
-        public static void Initialize(IConfiguration config)
+        private static SecretClient secretclient;
+        private static string saltconf;
+        private static string bucleconf;
+        private static string passwd;
+        public static void Initialize(IConfiguration config, SecretClient client)
         {
             configuration = config;
-            keyCifrado = configuration.GetValue<string>("ApiOAuth:CryptoKey");
+            secretclient = client;
+        }
+        public static void GetSecrets()
+        {
+            KeyVaultSecret secretSalt = secretclient.GetSecret("Salt");
+            saltconf = secretSalt.Value;
+
+            KeyVaultSecret secretIterate = secretclient.GetSecret("Iterate");
+            bucleconf = secretIterate.Value;
+
+            KeyVaultSecret secretKey = secretclient.GetSecret("Key");
+            passwd = secretKey.Value;
         }
 
-        public static string EncryptString(String dato)
+        public static string EncryptString(string dato)
         {
-            var saltconf = configuration.GetValue<string>("Crypto:Salt");
-            var bucleconf = configuration.GetValue<string>("Crypto:Iterate");
-            string password = configuration.GetValue<string>("Crypto:Key");
+            GetSecrets();
+
             byte[] saltpassword = EncriptarPasswordSalt
-                (password, saltconf, int.Parse(bucleconf));
-            String res = EncryptString(saltpassword, dato);
+                (passwd, saltconf, int.Parse(bucleconf));
+            string res = EncryptString(saltpassword, dato);
             return res;
         }
 
-        public static string DecryptString(String dato)
+        public static string DecryptString(string dato)
         {
-            var saltconf = configuration.GetValue<string>("Crypto:Salt");
-            var bucleconf = configuration.GetValue<string>("Crypto:Iterate");
-            string password = configuration.GetValue<string>("Crypto:Key");
+            GetSecrets();
+
             byte[] saltpassword = EncriptarPasswordSalt
-                (password, saltconf, int.Parse(bucleconf));
-            String res = DecryptString(saltpassword, dato);
+                (passwd, saltconf, int.Parse(bucleconf));
+            string res = DecryptString(saltpassword, dato);
             return res;
         }
 

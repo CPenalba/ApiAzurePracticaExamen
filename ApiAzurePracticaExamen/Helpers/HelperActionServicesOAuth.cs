@@ -2,20 +2,32 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Azure.Security.KeyVault.Secrets;
 
 namespace ApiAzurePracticaExamen.Helpers
 {
     public class HelperActionServicesOAuth
     {
+        private SecretClient secretclient;
         public string Issuer { get; set; }
         public string Audience { get; set; }
         public string SecretKey { get; set; }
 
-        public HelperActionServicesOAuth(IConfiguration configuration)
+        //public HelperActionServicesOAuth(IConfiguration configuration)
+        //{
+        //    this.Issuer = configuration.GetValue<string>("ApiOAuthToken:Issuer");
+        //    this.Audience = configuration.GetValue<string>("ApiOAuthToken:Audience");
+        //    this.SecretKey = configuration.GetValue<string>("ApiOAuthToken:SecretKey");
+        //}
+        public HelperActionServicesOAuth(IConfiguration configuration, SecretClient client)
         {
-            this.Issuer = configuration.GetValue<string>("ApiOAuthToken:Issuer");
-            this.Audience = configuration.GetValue<string>("ApiOAuthToken:Audience");
-            this.SecretKey = configuration.GetValue<string>("ApiOAuthToken:SecretKey");
+            this.secretclient = client;
+            KeyVaultSecret secretIssuer = this.secretclient.GetSecret("Issuer");
+            this.Issuer = secretIssuer.Value;
+            KeyVaultSecret secretAudience = this.secretclient.GetSecret("Audience");
+            this.Audience = secretAudience.Value;
+            KeyVaultSecret secretKey = this.secretclient.GetSecret("SecretKey");
+            this.SecretKey = secretKey.Value;
         }
 
         public SymmetricSecurityKey GetKeyToken()
